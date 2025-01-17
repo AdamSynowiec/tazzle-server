@@ -1,5 +1,5 @@
 {
-  "name": "flowdesk-server",
+  "name": "tazzle-server",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
