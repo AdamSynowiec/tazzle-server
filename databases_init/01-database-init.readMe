@@ -1,0 +1,21 @@
+Opis schematu:
+Tabela Users:
+
+Przechowuje dane użytkowników, takie jak nazwa użytkownika, e-mail, hasło (hashowane) i rola.
+Tabela Projects:
+
+Reprezentuje projekty, do których przypisane są tickety.
+Zawiera odniesienie do użytkownika, który stworzył projekt.
+Tabela Tickets:
+
+Przechowuje informacje o ticketach, takie jak tytuł, opis, status, priorytet, projekt, i przypisany użytkownik.
+Tabela Comments:
+
+Pozwala na dodawanie komentarzy do ticketów przez użytkowników.
+Tabela ChangeHistory:
+
+Śledzi zmiany dokonane w ticketach, kto je wprowadził i opis zmian.
+Zalety takiego schematu:
+Relacyjność: Relacje między tabelami są jasno zdefiniowane za pomocą kluczy obcych.
+Elastyczność: Można łatwo dodawać nowe funkcjonalności, np. tagi, załączniki, czy przypomnienia.
+Śledzenie zmian: Historia zmian pozwala na audyt i śledzenie działań w systemie.
