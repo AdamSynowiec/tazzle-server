@@ -5,7 +5,6 @@ const getComment = async (req) => {
   const { id } = req.params; // np. 'NBP-1'
   const [projectKey, ticketNumber] = id.split("-");
 
-  // Pobierz ticket_id
   const ticketResult = await executeQuery(
     `SELECT t.ticket_id
      FROM Tickets t
@@ -20,11 +19,14 @@ const getComment = async (req) => {
 
   const ticket_id = ticketResult[0].ticket_id;
 
-  // Pobierz komentarze
+  // Pobierz komentarze razem z nazwą użytkownika
   const comments = await executeQuery(
-    `SELECT comment_id, comment_text as ticketComments, user_id as userID, created_at as CreatedAt
-     FROM Comments
-     WHERE ticket_id = ? ORDER BY created_at ASC`,
+    `SELECT c.comment_id, c.comment_text as ticketComments, c.user_id as userID,
+            u.username, c.created_at as CreatedAt
+     FROM Comments c
+     INNER JOIN Users u ON c.user_id = u.user_id
+     WHERE c.ticket_id = ? 
+     ORDER BY c.created_at ASC`,
     [ticket_id]
   );
 

@@ -1,9 +1,13 @@
 const { executeQuery } = require("../database/dbQuery");
 
 // Pobranie wszystkich projektów
-const getProject = async () => {
-  const query = "SELECT * FROM Projects"; // Używamy poprawnej nazwy tabeli
-  const rows = await executeQuery(query, []);
+const getProject = async (userId) => {
+  const query = `
+    SELECT *
+    FROM Projects
+    WHERE owner_id = ? OR created_by = ?
+  `;
+  const rows = await executeQuery(query, [userId,userId]);
   return rows;
 };
 
@@ -12,8 +16,8 @@ const setProject = async (body) => {
   const project_key = body.ProjectKey || body.project_key;
   const project_name = body.ProjectName || body.project_name;
   const project_description = body.description || body.project_description;
-  const owner_id = body.owner_id || 1; // fallback testowy
-  const created_by = body.created_by || 1;
+  const created_by = body.owner_id;
+  const owner_id = body.owner_id;
 
   if (!project_key || !project_name) {
     throw new Error("Missing required fields");

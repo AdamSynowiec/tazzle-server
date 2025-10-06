@@ -11,6 +11,8 @@ const {
   getComment,
   setComment,
 } = require("../../controllers/commentController");
+const { login } = require("../../controllers/loginController");
+const { executeQuery } = require("../../database/dbQuery");
 const router = express.Router();
 
 const sendResponse = (
@@ -39,7 +41,13 @@ router.get("/test", async (req, res) => {
 // Projects
 router.get("/projects", async (req, res) => {
   try {
-    const rows = await getProject();
+    const userId = parseInt(req.query.userId, 10); // z query string
+    if (!userId)
+      return res
+        .status(400)
+        .json({ status: "error", message: "Missing userId" });
+
+    const rows = await getProject(userId);
     sendResponse(res, 200, rows, "Projects fetched successfully");
   } catch (error) {
     console.error(error);
@@ -81,7 +89,12 @@ router.get("/users", async (req, res) => {
 // Tickets
 router.get("/ticket", async (req, res) => {
   try {
-    const response = await getTicket(req);
+    const userId = parseInt(req.query.userId, 10);
+    if (!userId)
+      return res
+        .status(400)
+        .json({ status: "error", message: "Missing userId" });
+    const response = await getTicket(userId);
     sendResponse(res, 200, response, "Ticket fetched successfully");
   } catch (error) {
     console.error(error);
@@ -111,7 +124,9 @@ router.patch("/ticket/:id/status", async (req, res) => {
     );
 
     if (!statusRes.length) {
-      return res.status(400).json({ status: "error", message: "Status not found" });
+      return res
+        .status(400)
+        .json({ status: "error", message: "Status not found" });
     }
 
     const statusId = statusRes[0].status_id;
@@ -121,13 +136,44 @@ router.patch("/ticket/:id/status", async (req, res) => {
       [statusId, ticketId]
     );
 
-    res.status(200).json({ status: "success", message: "Status updated", data: { ticketId, status } });
+    res
+      .status(200)
+      .json({
+        status: "success",
+        message: "Status updated",
+        data: { ticketId, status },
+      });
   } catch (err) {
     console.error(err);
     res.status(500).json({ status: "error", message: err.message });
   }
 });
 
+// GET statusów
+router.get("/ticket/statuses", async (req, res) => {
+  try {
+    const statuses = await executeQuery(
+      "SELECT status_id, status_name FROM TicketStatus WHERE 1"
+    );
+    sendResponse(res, 200, statuses, "Statuses fetched successfully");
+  } catch (err) {
+    console.error(err);
+    sendResponse(res, 500, {}, "Failed to fetch statuses");
+  }
+});
+
+// GET priorytetów
+router.get("/ticket/priorities", async (req, res) => {
+  try {
+    const priorities = await executeQuery(
+      "SELECT priority_id, priority_name FROM TicketPriority WHERE 1"
+    );
+    sendResponse(res, 200, priorities, "Priorities fetched successfully");
+  } catch (err) {
+    console.error(err);
+    sendResponse(res, 500, {}, "Failed to fetch priorities");
+  }
+});
 
 // Browse
 router.get("/browse/:id", async (req, res) => {
@@ -155,6 +201,17 @@ router.get("/comment/:id", async (req, res) => {
 router.post("/comment", async (req, res) => {
   try {
     const response = await setComment(req);
+    sendResponse(res, 201, response, "Comment added successfully");
+  } catch (error) {
+    console.error(error);
+    sendResponse(res, 500, {}, error.message);
+  }
+});
+
+// GET login
+router.get("/login", async (req, res) => {
+  try {
+    const response = await login(req);
     sendResponse(res, 201, response, "Comment added successfully");
   } catch (error) {
     console.error(error);
